@@ -30,6 +30,7 @@ sonnet
 - [ ] PROJECT_SCOPE.md
 - [ ] Specific files: [list]
 - [ ] External docs: [URLs]
+- [ ] Current state audit: [run ui-reviewer/code-reviewer first if modifying existing code]
 
 ### 5. Memory
 - [ ] Load instincts: [names]

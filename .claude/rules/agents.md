@@ -15,6 +15,7 @@ Located in `~/.claude/agents/`:
 | e2e-runner | E2E testing | Critical user flows |
 | refactor-cleaner | Dead code cleanup | Code maintenance |
 | doc-updater | Documentation | Updating docs |
+| ui-reviewer | UI/UX quality audit | After implementing UI components |
 
 ## Immediate Agent Usage
 
@@ -23,6 +24,7 @@ No user prompt needed:
 2. Code just written/modified - Use **code-reviewer** agent
 3. Bug fix or new feature - Use **tdd-guide** agent
 4. Architectural decision - Use **architect** agent
+5. UI components modified - Use **ui-reviewer** agent
 
 ## Parallel Task Execution
 

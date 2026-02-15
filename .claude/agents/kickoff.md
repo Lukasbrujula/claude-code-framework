@@ -31,6 +31,9 @@ Before recommending anything, gather:
 7. **Data**: What data is collected? Sensitive? (PII, health, financial)
 8. **UI Requirements**: Does this need a user interface? How complex? (simple forms, dashboard, data-heavy, consumer-facing)
 9. **Budget for tools**: Can use paid tools like v0.dev/Vercel, or need free alternatives?
+10. **Design system**: Does this project need a custom design system? Using an existing component library (shadcn/ui)?
+11. **SEO requirements**: Does this need to rank in search engines? What pages are critical for organic traffic?
+12. **Accessibility requirements**: Any accessibility compliance needed? (WCAG AA, Section 508)
 
 ### Phase 2: Tech Stack Recommendation
 
@@ -142,6 +145,36 @@ npx shadcn-ui@latest add button card input form table dialog
 
 **Always ask user:** "Do you have budget for v0.dev/Bolt.new, or should we use the free React approach?"
 
+### Phase 3.5: Design & Frontend Assessment
+
+If the project has a user-facing frontend, assess and document:
+
+#### Design System Approach
+
+| Factor | Recommendation |
+|--------|---------------|
+| Component library | shadcn/ui (free, accessible) or custom |
+| Design tokens | Tailwind v4 @theme with semantic tokens |
+| Component architecture | Atomic Design (atoms -> molecules -> organisms -> templates -> pages) |
+| Responsive strategy | Mobile-first with standard breakpoints |
+
+#### SEO Requirements
+
+- [ ] HTML semantic structure needed
+- [ ] Dynamic metadata per page
+- [ ] Schema.org structured data
+- [ ] Sitemap and robots.txt
+- [ ] Open Graph / Twitter Cards
+
+#### Accessibility Requirements
+
+- [ ] WCAG AA compliance
+- [ ] Keyboard navigation
+- [ ] Color contrast validation
+- [ ] Touch target sizing (44x44px minimum)
+
+Document findings in PROJECT_SCOPE.md under a "Frontend Requirements" section.
+
 ### Phase 4: Compliance Assessment
 
 Check and document:
@@ -225,6 +258,7 @@ Based on the project type, select:
 | Go project | planner, go-reviewer, tdd-guide | golang-patterns, golang-testing |
 | Django project | planner, python-reviewer, security-reviewer | django-patterns, django-tdd, django-security |
 | Spring Boot | planner, code-reviewer, database-reviewer | springboot-patterns, springboot-tdd, jpa-patterns |
+| Consumer web app | planner, code-reviewer, ui-reviewer, security-reviewer | frontend-patterns, tailwind-design-system, next-best-practices, shadcn-ui |
 
 #### Step 4: Suggest Alternatives
 
