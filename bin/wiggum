@@ -1,0 +1,377 @@
+#!/bin/bash
+
+# Ralph Wiggum Mode - Fresh context per task
+# Usage: wiggum /path/to/project
+
+set -e
+
+PROJECT_DIR="${1:-.}"
+TASKS_DIR="$PROJECT_DIR/TASKS"
+ERRORS_DIR="$PROJECT_DIR/ERRORS"
+LOG_FILE="$PROJECT_DIR/.wiggum.log"
+MAX_RETRIES=3
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+NC='\033[0m' # No Color
+
+log() {
+    echo -e "${BLUE}[wiggum]${NC} $1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
+}
+
+error() {
+    echo -e "${RED}[wiggum ERROR]${NC} $1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $1" >> "$LOG_FILE"
+}
+
+success() {
+    echo -e "${GREEN}[wiggum]${NC} $1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] SUCCESS: $1" >> "$LOG_FILE"
+}
+
+warn() {
+    echo -e "${YELLOW}[wiggum]${NC} $1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] WARN: $1" >> "$LOG_FILE"
+}
+
+attempt() {
+    echo -e "${MAGENTA}[wiggum]${NC} $1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ATTEMPT: $1" >> "$LOG_FILE"
+}
+
+# Check project structure
+check_project() {
+    if [ ! -f "$PROJECT_DIR/CLAUDE.md" ]; then
+        error "No CLAUDE.md found. Run /kickoff first."
+        exit 1
+    fi
+
+    if [ ! -d "$TASKS_DIR" ]; then
+        error "No TASKS/ directory found. Run /kickoff first."
+        exit 1
+    fi
+
+    # Create ERRORS directory if it doesn't exist
+    mkdir -p "$ERRORS_DIR"
+}
+
+# Find next pending task
+get_next_task() {
+    for task_file in "$TASKS_DIR"/*.md; do
+        if [ -f "$task_file" ]; then
+            # Skip if task has max failures
+            local task_basename=$(basename "$task_file" .md)
+            if [ -f "$ERRORS_DIR/${task_basename}.md" ]; then
+                if grep -q "^**Status:** MAX_RETRIES_EXHAUSTED" "$ERRORS_DIR/${task_basename}.md" 2>/dev/null; then
+                    continue
+                fi
+            fi
+
+            # Check if task is pending
+            if grep -q "^\- \[x\] Pending" "$task_file" 2>/dev/null || \
+               (grep -q "^\- \[ \] In Progress" "$task_file" 2>/dev/null && \
+                grep -q "^\- \[ \] Verified" "$task_file" 2>/dev/null && \
+                grep -q "^\- \[ \] Complete" "$task_file" 2>/dev/null); then
+                echo "$task_file"
+                return 0
+            fi
+            # Also check for "In Progress" tasks (interrupted)
+            if grep -q "^\- \[x\] In Progress" "$task_file" 2>/dev/null; then
+                echo "$task_file"
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
+# Check if task needs human checkpoint
+needs_human_checkpoint() {
+    local task_file="$1"
+    grep -q "^\- \[x\] \*\*REQUIRED\*\*" "$task_file" 2>/dev/null
+}
+
+# Get current attempt count for a task
+get_attempt_count() {
+    local task_name="$1"
+    local error_file="$ERRORS_DIR/${task_name}.md"
+    if [ -f "$error_file" ]; then
+        grep -c "^### Attempt" "$error_file" 2>/dev/null || echo "0"
+    else
+        echo "0"
+    fi
+}
+
+# Save error to ERRORS directory
+save_error() {
+    local task_name="$1"
+    local attempt_num="$2"
+    local exit_code="$3"
+    local error_file="$ERRORS_DIR/${task_name}.md"
+
+    # Create or append to error file
+    if [ ! -f "$error_file" ]; then
+        cat > "$error_file" << EOF
+# Failed Task: ${task_name}
+
+**Task file:** TASKS/${task_name}.md
+**First failure:** $(date '+%Y-%m-%d %H:%M:%S')
+**Max retries:** $MAX_RETRIES
+
+---
+
+EOF
+    fi
+
+    # Append attempt info
+    cat >> "$error_file" << EOF
+### Attempt $attempt_num - $(date '+%Y-%m-%d %H:%M:%S')
+
+**Exit code:** $exit_code
+**Approach tried:** (manual review needed)
+
+---
+
+EOF
+
+    log "Error saved to: $error_file"
+}
+
+# Mark task as max retries exhausted
+mark_exhausted() {
+    local task_name="$1"
+    local error_file="$ERRORS_DIR/${task_name}.md"
+
+    cat >> "$error_file" << EOF
+
+## Final Status
+
+**Status:** MAX_RETRIES_EXHAUSTED
+**Total attempts:** $MAX_RETRIES
+**Time:** $(date '+%Y-%m-%d %H:%M:%S')
+
+**Action required:** Manual intervention needed. Review the approaches tried above and either:
+1. Fix the underlying issue manually
+2. Modify the task requirements
+3. Skip this task and proceed
+
+To retry after fixing:
+1. Delete this error file
+2. Run \`wiggum\` again
+
+EOF
+
+    error "Task exhausted max retries. Error log: $error_file"
+}
+
+# Count tasks
+count_tasks() {
+    local status="$1"
+    local count=0
+    for task_file in "$TASKS_DIR"/*.md; do
+        if [ -f "$task_file" ]; then
+            if grep -q "^\- \[x\] $status" "$task_file" 2>/dev/null; then
+                ((count++))
+            fi
+        fi
+    done
+    echo $count
+}
+
+# Count failed tasks
+count_failed() {
+    local count=0
+    for error_file in "$ERRORS_DIR"/*.md; do
+        if [ -f "$error_file" ]; then
+            if grep -q "^**Status:** MAX_RETRIES_EXHAUSTED" "$error_file" 2>/dev/null; then
+                ((count++))
+            fi
+        fi
+    done
+    echo $count
+}
+
+# Main loop
+main() {
+    check_project
+
+    log "Starting Ralph Wiggum mode for: $PROJECT_DIR"
+    log "Tasks directory: $TASKS_DIR"
+    log "Max retries per task: $MAX_RETRIES"
+
+    local total_tasks=$(ls -1 "$TASKS_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+    log "Total tasks found: $total_tasks"
+
+    while true; do
+        local next_task
+        next_task=$(get_next_task) || {
+            local completed=$(count_tasks "Complete")
+            local failed=$(count_failed)
+
+            if [ "$failed" -gt 0 ]; then
+                warn "Finished with failures"
+                echo ""
+                echo "⚠️  Project finished with $failed failed task(s)"
+                echo ""
+                echo "Summary:"
+                echo "  - Total tasks: $total_tasks"
+                echo "  - Completed: $completed"
+                echo "  - Failed (max retries): $failed"
+                echo ""
+                echo "Failed tasks:"
+                for error_file in "$ERRORS_DIR"/*.md; do
+                    if [ -f "$error_file" ]; then
+                        if grep -q "^**Status:** MAX_RETRIES_EXHAUSTED" "$error_file" 2>/dev/null; then
+                            echo "  - $(basename "$error_file" .md)"
+                        fi
+                    fi
+                done
+                echo ""
+                echo "Review ERRORS/ directory for details."
+                exit 1
+            else
+                success "All tasks complete! ($completed/$total_tasks)"
+                echo ""
+                echo "🎉 Project complete!"
+                echo ""
+                echo "Summary:"
+                echo "  - Total tasks: $total_tasks"
+                echo "  - Completed: $completed"
+                echo ""
+                echo "Next steps:"
+                echo "  - Review LEARNINGS.md for insights"
+                echo "  - Run final tests"
+                echo "  - Consider deployment"
+                exit 0
+            fi
+        }
+
+        local task_name=$(basename "$next_task" .md)
+        local task_file_name=$(basename "$next_task")
+        local current_attempt=$(get_attempt_count "$task_name")
+        current_attempt=$((current_attempt + 1))
+
+        log "Next task: $task_file_name (attempt $current_attempt/$MAX_RETRIES)"
+
+        # Check if max retries exceeded
+        if [ "$current_attempt" -gt "$MAX_RETRIES" ]; then
+            mark_exhausted "$task_name"
+            warn "Skipping to next task..."
+            continue
+        fi
+
+        # Check for human checkpoint
+        if needs_human_checkpoint "$next_task"; then
+            warn "⏸️  HUMAN CHECKPOINT REQUIRED"
+            echo ""
+            echo "Task: $task_file_name"
+            echo ""
+            echo "Preview:"
+            grep -A 5 "^## Description" "$next_task" 2>/dev/null || echo "(no description)"
+            echo ""
+            read -p "Proceed? (yes/no/skip): " response
+
+            case "$response" in
+                yes|y|Y)
+                    log "Human approved: $task_file_name"
+                    ;;
+                skip|s|S)
+                    warn "Skipping task: $task_file_name"
+                    echo "" >> "$next_task"
+                    echo "<!-- SKIPPED by wiggum at $(date) -->" >> "$next_task"
+                    continue
+                    ;;
+                *)
+                    log "Human declined. Stopping wiggum."
+                    exit 0
+                    ;;
+            esac
+        fi
+
+        attempt "Running Claude on: $task_file_name (attempt $current_attempt/$MAX_RETRIES)"
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "  TASK: $task_file_name"
+        echo "  ATTEMPT: $current_attempt / $MAX_RETRIES"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+
+        cd "$PROJECT_DIR"
+
+        # Run claude interactively
+        claude --prompt "/next"
+
+        local exit_code=$?
+
+        if [ $exit_code -ne 0 ]; then
+            error "Claude exited with error code: $exit_code"
+            save_error "$task_name" "$current_attempt" "$exit_code"
+
+            if [ "$current_attempt" -ge "$MAX_RETRIES" ]; then
+                mark_exhausted "$task_name"
+                echo ""
+                read -p "Continue to next task? (yes/no): " cont
+                if [ "$cont" != "yes" ] && [ "$cont" != "y" ]; then
+                    error "Stopping wiggum."
+                    exit 1
+                fi
+            else
+                echo ""
+                warn "Attempt $current_attempt failed. $((MAX_RETRIES - current_attempt)) retries remaining."
+                read -p "Retry now? (yes/no/skip): " retry
+                case "$retry" in
+                    skip|s|S)
+                        mark_exhausted "$task_name"
+                        ;;
+                    no|n|N)
+                        log "Stopping wiggum."
+                        exit 0
+                        ;;
+                    *)
+                        log "Retrying task..."
+                        ;;
+                esac
+            fi
+        else
+            log "Task session complete. Checking status..."
+        fi
+
+        sleep 1
+
+        local completed=$(count_tasks "Complete")
+        log "Progress: $completed/$total_tasks tasks complete"
+        echo ""
+    done
+}
+
+# Handle Ctrl+C gracefully
+trap 'echo ""; warn "Interrupted. Progress saved in task files."; exit 130' INT
+
+# Show help
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Ralph Wiggum Mode - Fresh context per task"
+    echo ""
+    echo "Usage: wiggum [project-directory]"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help    Show this help"
+    echo ""
+    echo "Features:"
+    echo "  - Fresh context window for each task"
+    echo "  - Max $MAX_RETRIES retries per task"
+    echo "  - Errors saved to ERRORS/ directory"
+    echo "  - Human checkpoints for risky tasks"
+    echo ""
+    echo "Requirements:"
+    echo "  - CLAUDE.md must exist"
+    echo "  - TASKS/ directory with task files"
+    echo "  - Run /kickoff first to set up project"
+    exit 0
+fi
+
+main
