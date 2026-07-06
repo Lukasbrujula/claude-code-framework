@@ -32,8 +32,8 @@
 
 ## Project-Specific Rules
 <!-- The stuff Claude can't infer. API quirks, naming conventions, architectural decisions.
-     Example: "Telnyx uses POST not PATCH for updates"
-     Example: "FE category is Y not 8 in Compulife"
+     Example: "Acme Telephony uses POST not PATCH for updates"
+     Example: "Status code is 'active' not 1 in Acme Quotes API"
      Example: "Never touch files in components/ui/" -->
 
 ## Mistakes

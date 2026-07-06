@@ -113,6 +113,7 @@ Compound over weeks → Claude gets project-specific smart
 | `/plan` | Before any non-trivial implementation |
 | `/next` | Pick up next pending task (wiggum mode) |
 | `/verify` | Check build, types, lint, tests |
+| `/audit-wiring` | Before launch/demo — trace every field/flag/state to its consumer, flag DECORATIVE ones |
 | `/learn` | Extract reusable pattern from current session |
 | `/checkpoint` | Save/verify progress state |
 

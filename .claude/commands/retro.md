@@ -6,7 +6,7 @@ Weekly learning-loop checkpoint. Closes the loop: LEARNINGS.md → CLAUDE.md rul
 
 1. **Read the stores**: `LEARNINGS.md`, `ERRORS/`, and the Mistakes section of `CLAUDE.md`.
 
-2. **Reconcile**: every LEARNINGS entry should have its one-liner in CLAUDE.md Mistakes; every ERRORS/ file from the past week should have a LEARNINGS entry. Create what's missing (with provenance).
+2. **Reconcile**: every LEARNINGS entry should have its one-liner in CLAUDE.md Mistakes; every ERRORS/ file from the past week should have a LEARNINGS entry. Create what's missing (with provenance). Then check `KNOWN_GAPS.md`: every entry past its resolution condition is escalated — fix now, renegotiate the condition explicitly with the user, or graduate to a blocking check. Overdue gaps never age silently.
 
 3. **Detect recurrence**: for each entry, check whether the same mistake happened again this week (ERRORS/, git history, session memory). If so, increment its `seen:` count — do not write a duplicate entry.
 
@@ -32,6 +32,7 @@ New entries reconciled: n
 Recurrences found:      n
 Graduated:              n  (list: entry → check path)
 Cannot machine-check:   n  (list, with reason)
+Gaps overdue:           n  (KNOWN_GAPS.md entries past their resolution condition)
 Pruned:                 n
 ```
 

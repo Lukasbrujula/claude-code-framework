@@ -123,20 +123,20 @@ The loop has a deterministic backstop. When the same mistake recurs (`seen: 2` i
 **CLAUDE.md** is the rule book — concise one-liners that Claude reads every session. Keep it under 200 lines. Example entries in the Mistakes section:
 
 ```
-- Use ON/OFF for HA toggles, not Y/N
-- FE category is "Y" (GIWL), not "8" (No-Lapse UL)
-- Telnyx uses POST not PATCH for assistant updates
+- Use ON/OFF for risk-analyzer toggles, not Y/N
+- Status code is "active", not "1"
+- Acme Telephony uses POST not PATCH for assistant updates
 - Always run tsc --noEmit after changes
 ```
 
 **LEARNINGS.md** is the journal — full context about what went wrong and why. It feeds rules into CLAUDE.md but doesn't load every session. Example:
 
 ```
-### 2026-03-12 — Compulife HA toggle format
-**What happened:** Health Analyzer returned wrong results for diabetic clients
+### 2026-03-12 — Acme Quotes API toggle format
+**What happened:** The risk analyzer returned wrong results for high-risk clients
 **Root cause:** API uses ON/OFF strings, not Y/N booleans
-**Fix:** Changed all HA toggle values to ON/OFF
-**Rule for CLAUDE.md:** "Use ON/OFF for HA toggles, not Y/N"
+**Fix:** Changed all toggle values to ON/OFF
+**Rule for CLAUDE.md:** "Use ON/OFF for risk-analyzer toggles, not Y/N"
 ```
 
 ### Cross-Session Memory (claude-mem)
@@ -219,6 +219,7 @@ claude --worktree feature-ui
 | `/plan` | Before any non-trivial implementation |
 | `/next` | Pick up the next pending task (wiggum mode) |
 | `/verify` | Validate build, types, lint, tests before committing |
+| `/audit-wiring` | Before launch/demo milestones — parallel read-only trace of every field, flag, and state to its consumer; classifies WIRED / DECORATIVE / UNCLEAR |
 | `/learn` | Extract reusable patterns from the current session |
 | `/retro` | Weekly learning checkpoint — reconcile LEARNINGS.md, graduate recurring mistakes to machine checks |
 | `/checkpoint` | Save or verify progress state |

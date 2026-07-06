@@ -19,6 +19,7 @@ sonnet
 ### 3. Guardrails
 - Do NOT modify: [protected files]
 - Do NOT skip: [tests, validation]
+- Deferring known-wrong behavior in this task → KNOWN_GAPS.md entry in the same commit, not at session end
 
 ### 4. Knowledge
 - [x] CLAUDE.md + LEARNINGS.md (always)
@@ -30,6 +31,7 @@ sonnet
 - [ ] Evidence is PROVEN (command + output shown in-session), not a self-report; anything unprovable here is listed as NOT VERIFIED HERE
 - [ ] Wiring: every behavior-affecting field this task adds is shown to change output, or explicitly marked DECORATIVE
 - [ ] Vocabulary: external values the code matches against (enums, statuses, DB values) verified against the live source — note what was found and where
+- [ ] Scope: `git diff --name-only` matches the files this task expected to touch — extras get a rationale added here, or are reverted into their own task
 
 ### 6. Dependencies
 - [ ] Task [ID] must be complete
@@ -49,7 +51,7 @@ Log to LEARNINGS.md if: unexpected error, workaround discovered, API behaved dif
 <!-- One paragraph. Single outcome. -->
 
 ## Steps
-1. [Step]
+1. Discovery: confirm the current shape/state of everything this task changes (persistence format, existing consumers) BEFORE writing code
 2. [Step]
 
 ## On Completion

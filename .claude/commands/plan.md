@@ -96,8 +96,9 @@ Agent (planner):
 When a confirmed plan spans more than one task or session, it must not live only in chat history:
 
 1. **Persist it.** Write the confirmed plan to `TASKS/DESIGN-<arc>.md`. That file — not anyone's memory of the conversation — is the authority on scope, interfaces, invariants, and non-goals.
-2. **Doc changes before code diverges.** If implementation reveals the design is wrong, STOP, update the design doc first (recording why, with provenance), then change the code. Code never silently diverges from the doc.
-3. **Independent review at every task boundary.** Invoke the **design-reviewer** agent (read-only, did not write the code or the doc) to diff implementation against the design doc. It classifies findings as CONFORMS / DEVIATES / UNDOCUMENTED / MISSING. Any DEVIATES blocks the arc until doc and code agree. Run it again before merging the arc.
+2. **Audit existing state before specifying new shapes.** The design doc records what the current data model actually stores — shape and format at rest — before defining new entities. Any shape change names its migration path or confirms backward compatibility, in the doc. A persistence mismatch discovered mid-task is a multi-hour rework cycle the design doc existed to prevent.
+3. **Doc changes before code diverges.** If implementation reveals the design is wrong, STOP, update the design doc first (recording why, with provenance), then change the code. Code never silently diverges from the doc.
+4. **Independent review at every task boundary.** Invoke the **design-reviewer** agent (read-only, did not write the code or the doc) to diff implementation against the design doc. It classifies findings as CONFORMS / DEVIATES / UNDOCUMENTED / MISSING. Any DEVIATES blocks the arc until doc and code agree. Run it again before merging the arc.
 
 ## Important Notes
 

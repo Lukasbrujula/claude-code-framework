@@ -15,6 +15,7 @@ git worktree add .worktrees/<lane> -b lane/<lane>
 - Two lanes never share a working tree; shared uncommitted state is how lanes destroy each other's work.
 - A lane commits to its own branch inside its worktree. Merging happens only in the canonical checkout.
 - When a lane ends: merge or discard, then `git worktree remove .worktrees/<lane>`.
+- Multi-agent dispatch: give every subagent explicit absolute paths to the intended checkout. A subagent relying on the working directory silently reads the wrong branch when worktrees are in play.
 
 ## Enforcement
 

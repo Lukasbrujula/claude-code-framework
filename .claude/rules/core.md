@@ -7,6 +7,8 @@
 - Work incrementally: 50 lines → test → continue. Never 500 lines then test.
 - Report results as PROVEN (command + output shown) or CLAIM — see rules/verification.md. A sub-agent's self-report is a CLAIM until re-verified.
 - After ANY correction: write the LEARNINGS.md entry (with provenance), then distill the one-liner into CLAUDE.md's Mistakes section. LEARNINGS.md is the system of record.
+- Deliberately leaving known-wrong behavior? Write the KNOWN_GAPS.md entry in the same commit (severity + resolution condition). A deferral without a tracked entry is a silent gap — a later audit re-discovers it at the cost of a new bug.
+- Before any first-customer, demo, or launch milestone: run `/audit-wiring` — a parallel, read-only trace of every field, flag, and state to its downstream consumer.
 - If something goes sideways mid-implementation: STOP and re-plan immediately.
 
 ## Failure Protocol
@@ -37,6 +39,7 @@ One canonical checkout for integration ops (merge/push/release); every concurren
 - Validate all inputs (Zod or equivalent). No hardcoded secrets. No console.log in commits.
 - Functions < 50 lines, files < 800 lines. Catch every error with context.
 - Critical paths fail loudly: propagate the error, or return an explicit error flag plus an alerting event — never success over a swallowed failure (rules/pipeline-boundaries.md).
+- Logic branches on stable IDs and structured data; display strings are for rendering only (rules/boundary-typing.md).
 
 ## Agents
 
