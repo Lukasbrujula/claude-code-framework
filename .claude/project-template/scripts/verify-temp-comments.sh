@@ -17,16 +17,18 @@
 
 set -u
 
-SRC_DIRS=${SRC_DIRS:-"src app lib server api"}
+SRC_DIRS=${SRC_DIRS:-"."}
 MARKERS=${MARKERS:-"TEMP|FIXME|HACK"}   # set MARKERS="TEMP|FIXME|HACK|TODO" to require refs on TODOs too
 REF_PATTERN='[A-Z][A-Z0-9]+-[0-9]+|#[0-9]+|TASKS/|KNOWN_GAPS'
 
 fail=0
+SELF=$(basename "$0")
 for dir in $SRC_DIRS; do
   [ -d "$dir" ] || continue
   hits=$(grep -rnIE "\b(${MARKERS})\b" "$dir" \
-           --exclude-dir=node_modules --exclude-dir=vendor \
+           --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=.git \
            --exclude-dir=dist --exclude-dir=build --exclude-dir=.next \
+           --exclude="$SELF" \
          | grep -vE "$REF_PATTERN")
   if [ -n "$hits" ]; then
     echo "FAIL: unreferenced marker(s) [${MARKERS}] in $dir/ — link a task, issue, or KNOWN_GAPS entry:"

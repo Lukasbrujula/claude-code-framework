@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "case \"$TOOL_INPUT\" in *.env*|*package-lock.json*|*.git/*) echo 'BLOCKED: Protected file' >&2; exit 2;; esac"
+            "command": "TOOL_INPUT=$(cat | node -e 'let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{const j=JSON.parse(d);process.stdout.write(j.tool_input?.file_path||\"\")}catch{}})'); case \"$TOOL_INPUT\" in *.env*|*package-lock.json*|*.git/*) echo 'BLOCKED: Protected file' >&2; exit 2;; esac"
           }
         ]
       },
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f .git ]; then case \"$TOOL_INPUT\" in *'git merge'*|*'git push'*main*|*'git push'*master*) echo 'BLOCKED: integration git ops (merge, push to main) run in the canonical checkout, not a worktree — see rules/git-isolation.md' >&2; exit 2;; esac; fi"
+            "command": "TOOL_CMD=$(cat | node -e 'let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{const j=JSON.parse(d);process.stdout.write(j.tool_input?.command||\"\")}catch{}})'); if [ -f .git ]; then case \"$TOOL_CMD\" in *'git merge'*|*'git push'*main*|*'git push'*master*) echo 'BLOCKED: integration git ops (merge, push to main) run in the canonical checkout, not a worktree — see rules/git-isolation.md' >&2; exit 2;; esac; fi"
           }
         ]
       }

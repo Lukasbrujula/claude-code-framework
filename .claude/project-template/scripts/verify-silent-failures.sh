@@ -13,7 +13,8 @@
 
 set -u
 
-SRC_DIRS=${SRC_DIRS:-"src app lib server api"}
+SRC_DIRS=${SRC_DIRS:-"."}
+EXCLUDE_DIRS=(--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build --exclude-dir=.next)
 fail=0
 
 check() {
@@ -33,22 +34,22 @@ for dir in $SRC_DIRS; do
 
   # JS/TS: empty catch blocks — catch {} / catch (e) { }
   check "empty catch block in $dir/" \
-    grep -rnE 'catch[[:space:]]*(\([^)]*\))?[[:space:]]*\{[[:space:]]*\}' "$dir" \
+    grep -rnE "${EXCLUDE_DIRS[@]}" 'catch[[:space:]]*(\([^)]*\))?[[:space:]]*\{[[:space:]]*\}' "$dir" \
       --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx'
 
   # JS/TS: swallowing promise rejections — .catch(() => {}) / .catch(function(){})
   check "empty .catch() handler in $dir/" \
-    grep -rnE '\.catch\([[:space:]]*(\([^)]*\)[[:space:]]*=>[[:space:]]*\{[[:space:]]*\}|function[[:space:]]*\([^)]*\)[[:space:]]*\{[[:space:]]*\})[[:space:]]*\)' "$dir" \
+    grep -rnE "${EXCLUDE_DIRS[@]}" '\.catch\([[:space:]]*(\([^)]*\)[[:space:]]*=>[[:space:]]*\{[[:space:]]*\}|function[[:space:]]*\([^)]*\)[[:space:]]*\{[[:space:]]*\})[[:space:]]*\)' "$dir" \
       --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx'
 
   # Python: single-line `except ...: pass`
   check "except-pass in $dir/" \
-    grep -rnE 'except[^:]*:[[:space:]]*pass[[:space:]]*(#.*)?$' "$dir" \
+    grep -rnE "${EXCLUDE_DIRS[@]}" 'except[^:]*:[[:space:]]*pass[[:space:]]*(#.*)?$' "$dir" \
       --include='*.py'
 
   # Go: discarded errors — `_ = err` and `if err != nil { }` on one line
   check "discarded error in $dir/" \
-    grep -rnE '(^|[[:space:]])_[[:space:]]*=[[:space:]]*err\b|if err != nil \{[[:space:]]*\}' "$dir" \
+    grep -rnE "${EXCLUDE_DIRS[@]}" '(^|[[:space:]])_[[:space:]]*=[[:space:]]*err\b|if err != nil \{[[:space:]]*\}' "$dir" \
       --include='*.go'
 done
 
