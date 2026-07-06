@@ -116,6 +116,8 @@ Next session reads CLAUDE.md → mistake doesn't repeat
 Over weeks, the Mistakes section becomes a project-specific brain
 ```
 
+The loop has a deterministic backstop. When the same mistake recurs (`seen: 2` in LEARNINGS.md), `/retro` — run weekly, with a SessionStart nag when LEARNINGS.md goes 7+ days untouched — graduates it from prose into a machine check: an `eslint-rules/` rule, a `scripts/verify-*` script, a settings.json hook, or the CI verify workflow. A lesson that recurs twice as prose is a failed lesson. LEARNINGS.md is the single system of record; auto-extractors (claude-mem, continuous-learning, instincts) are optional feeders and lose on conflict.
+
 ### CLAUDE.md vs LEARNINGS.md
 
 **CLAUDE.md** is the rule book — concise one-liners that Claude reads every session. Keep it under 200 lines. Example entries in the Mistakes section:
@@ -139,7 +141,7 @@ Over weeks, the Mistakes section becomes a project-specific brain
 
 ### Cross-Session Memory (claude-mem)
 
-The plugin automates parts of this loop. When a session ends, it extracts key learnings and stores them in a local database. Next session, it searches past learnings for relevant context. Think of it as an automated LEARNINGS.md that persists even if you don't manually write entries.
+The plugin automates parts of this loop. When a session ends, it extracts key learnings and stores them in a local database. Next session, it searches past learnings for relevant context. It's a feeder, not the record: anything worth keeping still gets written to LEARNINGS.md, and on conflict LEARNINGS.md wins.
 
 ---
 
@@ -218,6 +220,7 @@ claude --worktree feature-ui
 | `/next` | Pick up the next pending task (wiggum mode) |
 | `/verify` | Validate build, types, lint, tests before committing |
 | `/learn` | Extract reusable patterns from the current session |
+| `/retro` | Weekly learning checkpoint — reconcile LEARNINGS.md, graduate recurring mistakes to machine checks |
 | `/checkpoint` | Save or verify progress state |
 | `/code-review` | Review code quality after implementation |
 | `/build-fix` | Fix build errors systematically |

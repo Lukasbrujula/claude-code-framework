@@ -47,6 +47,7 @@
 - Before adding, check if a similar rule already exists. If so, refine it instead.
 - Never add generic coding advice Claude already knows. Only project-specific gotchas.
 - If Mistakes section exceeds 30 lines, consolidate related rules into groups.
+- If the same mistake is corrected twice, stop writing prose: graduate it to a machine check (eslint-rules/, scripts/verify-*, hook, or CI) via /retro, and mark the LEARNINGS.md entry GRADUATED.
 - After adding a rule, confirm: "Added to Mistakes: [the rule]"
 
 ## Current Phase

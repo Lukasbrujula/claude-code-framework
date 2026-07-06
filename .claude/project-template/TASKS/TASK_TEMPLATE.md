@@ -1,7 +1,8 @@
 # Task: [TASK_NAME]
 
-**Status:** Pending | In Progress | Verified | Complete
+**Status:** Pending | In Progress | Verified (criteria PROVEN in-session) | Complete
 **Human Checkpoint:** None | Required (reason)
+**Provenance:** [How/when this task originated + source to read for full context — retro, bug report, design doc, user request]
 
 ## Pillars
 
@@ -26,6 +27,9 @@ sonnet
 ### 5. Success Criteria
 - [ ] [Exact measurable check]
 - [ ] Verification: `[command that returns 0 on success]`
+- [ ] Evidence is PROVEN (command + output shown in-session), not a self-report; anything unprovable here is listed as NOT VERIFIED HERE
+- [ ] Wiring: every behavior-affecting field this task adds is shown to change output, or explicitly marked DECORATIVE
+- [ ] Vocabulary: external values the code matches against (enums, statuses, DB values) verified against the live source — note what was found and where
 
 ### 6. Dependencies
 - [ ] Task [ID] must be complete

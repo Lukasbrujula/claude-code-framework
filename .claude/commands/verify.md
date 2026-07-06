@@ -6,6 +6,10 @@ Run comprehensive verification on current codebase state.
 
 Execute verification in this exact order:
 
+0. **Invariant Checks (scripts/verify-*)**
+   - Run every executable file matching `scripts/verify-*`; each exits non-zero on failure
+   - These are graduated learnings — a failure here is the regression of a known past mistake. Report which check failed and link its LEARNINGS.md entry
+
 1. **Build Check**
    - Run the build command for this project
    - If it fails, report errors and STOP
@@ -38,15 +42,21 @@ Produce a concise verification report:
 ```
 VERIFICATION: [PASS/FAIL]
 
-Build:    [OK/FAIL]
-Types:    [OK/X errors]
-Lint:     [OK/X issues]
-Tests:    [X/Y passed, Z% coverage]
-Secrets:  [OK/X found]
-Logs:     [OK/X console.logs]
+Invariants: [OK/X failed]
+Build:      [OK/FAIL]
+Types:      [OK/X errors]
+Lint:       [OK/X issues]
+Tests:      [X/Y passed, Z% coverage]
+Secrets:    [OK/X found]
+Logs:       [OK/X console.logs]
 
 Ready for PR: [YES/NO]
+
+NOT VERIFIED HERE: [claims outside this run — deploy behavior,
+external API contracts, cross-service effects; "none" if empty]
 ```
+
+Everything above the NOT VERIFIED HERE line is PROVEN by commands run in this session (rules/verification.md). Anything this report cannot prove must appear in that list — never implied as covered.
 
 If any critical issues, list them with fix suggestions.
 

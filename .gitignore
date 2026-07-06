@@ -2,3 +2,6 @@
 *.log
 .wiggum.log
 .claude/checkpoints.log
+.env*
+node_modules/
+.worktrees/

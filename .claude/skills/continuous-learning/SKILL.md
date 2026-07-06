@@ -5,6 +5,8 @@ description: Automatically extract reusable patterns from Claude Code sessions a
 
 # Continuous Learning Skill
 
+> **Status: optional feeder, not the system of record.** The primary learning loop is manual and markdown: LEARNINGS.md → CLAUDE.md Mistakes → graduation to a machine check via `/retro`. This skill may surface candidates for that loop; anything it extracts only counts once it lands in LEARNINGS.md. On conflict, LEARNINGS.md wins. Note its Stop hook is NOT wired in settings.json.template by default.
+
 Automatically evaluates Claude Code sessions on end to extract reusable patterns that can be saved as learned skills.
 
 ## How It Works

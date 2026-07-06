@@ -11,8 +11,9 @@ Sequential agent workflow for complex tasks.
 ### feature
 Full feature implementation workflow:
 ```
-planner -> tdd-guide -> code-reviewer -> security-reviewer
+planner -> tdd-guide -> design-reviewer -> code-reviewer -> security-reviewer
 ```
+For multi-task arcs, planner persists the confirmed plan to `TASKS/DESIGN-<arc>.md` first (see /plan); design-reviewer checks the implementation against that doc, not against the chat history.
 
 ### bugfix
 Bug investigation and fix workflow:
@@ -135,7 +136,9 @@ RECOMMENDATION
 
 ## Parallel Execution
 
-For independent checks, run agents in parallel:
+Parallel agents that **modify files** must each run in their own git worktree (`git worktree add .worktrees/<lane> -b lane/<lane>`) — never in a shared working tree. Merge their branches in the canonical checkout afterward (rules/git-isolation.md). Each agent's completion report is a CLAIM until the main lane re-verifies it (rules/verification.md).
+
+For independent read-only checks, run agents in parallel:
 
 ```markdown
 ### Parallel Phase

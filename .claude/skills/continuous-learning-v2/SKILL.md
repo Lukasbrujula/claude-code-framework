@@ -6,6 +6,8 @@ version: 2.0.0
 
 # Continuous Learning v2 - Instinct-Based Architecture
 
+> **Status: experimental, optional feeder — not the system of record.** The primary learning loop is manual and markdown: LEARNINGS.md → CLAUDE.md Mistakes → graduation to a machine check via `/retro`. Instincts may propose candidates for that loop; on conflict, LEARNINGS.md wins. Its observation hooks are NOT wired in settings.json.template by default.
+
 An advanced learning system that turns your Claude Code sessions into reusable knowledge through atomic "instincts" - small learned behaviors with confidence scoring.
 
 ## What's New in v2

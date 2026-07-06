@@ -59,6 +59,19 @@ if [ -f "$TEMPLATE_DIR/TASKS/TASK_TEMPLATE.md" ]; then
     cp "$TEMPLATE_DIR/TASKS/TASK_TEMPLATE.md" "$TARGET_DIR/TASKS/"
 fi
 
+# Copy enforcement scaffolding (graduation targets for the learning loop)
+for d in scripts eslint-rules; do
+    if [ -d "$TEMPLATE_DIR/$d" ]; then
+        mkdir -p "$TARGET_DIR/$d"
+        cp -r "$TEMPLATE_DIR/$d/." "$TARGET_DIR/$d/"
+    fi
+done
+if [ -d "$TEMPLATE_DIR/.github" ]; then
+    mkdir -p "$TARGET_DIR/.github"
+    cp -r "$TEMPLATE_DIR/.github/." "$TARGET_DIR/.github/"
+fi
+chmod +x "$TARGET_DIR"/scripts/verify-* 2>/dev/null || true
+
 success "Project initialized!"
 echo ""
 echo "Created:"
@@ -67,6 +80,9 @@ echo "  - LEARNINGS.md"
 echo "  - PROJECT_SCOPE.md"
 echo "  - TASKS/"
 echo "  - ERRORS/"
+echo "  - scripts/verify-*        (invariant checks — run by /verify and CI)"
+echo "  - eslint-rules/           (project-local lint rules)"
+echo "  - .github/workflows/      (CI build gate)"
 echo ""
 echo "Next steps:"
 echo "  1. Run: claude"

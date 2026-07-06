@@ -4,9 +4,11 @@
 
 ### SessionStart
 - **Project detection**: Runs `detect-project.sh` — auto-identifies runtime, framework, database, UI library, and suggests relevant skills.
+- **Learning-loop reminder**: Prints a nag when LEARNINGS.md hasn't been touched for 7+ days — run `/retro`.
 
 ### PreToolUse
 - **File protection**: Blocks edits to `.env*`, `package-lock.json`, `.git/`. Exit code 2 = hard block.
+- **Worktree guard**: Blocks `git merge` and `git push` to main/master when run inside a linked worktree (detected via `.git` being a file, not a directory). Known limits: cannot distinguish two full clones, and a bare `git push` whose upstream is main isn't caught — those cases are convention (rules/git-isolation.md).
 
 ### PostToolUse
 - **Auto-format**: Runs formatter after every Write/Edit/MultiEdit.

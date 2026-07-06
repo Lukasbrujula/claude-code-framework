@@ -91,6 +91,14 @@ Agent (planner):
 **WAITING FOR CONFIRMATION**: Proceed with this plan? (yes/no/modify)
 ```
 
+## Multi-Task Arcs: The Design Doc Is Authoritative
+
+When a confirmed plan spans more than one task or session, it must not live only in chat history:
+
+1. **Persist it.** Write the confirmed plan to `TASKS/DESIGN-<arc>.md`. That file — not anyone's memory of the conversation — is the authority on scope, interfaces, invariants, and non-goals.
+2. **Doc changes before code diverges.** If implementation reveals the design is wrong, STOP, update the design doc first (recording why, with provenance), then change the code. Code never silently diverges from the doc.
+3. **Independent review at every task boundary.** Invoke the **design-reviewer** agent (read-only, did not write the code or the doc) to diff implementation against the design doc. It classifies findings as CONFORMS / DEVIATES / UNDOCUMENTED / MISSING. Any DEVIATES blocks the arc until doc and code agree. Run it again before merging the arc.
+
 ## Important Notes
 
 **CRITICAL**: The planner agent will **NOT** write any code until you explicitly confirm the plan with "yes" or "proceed" or similar affirmative response.

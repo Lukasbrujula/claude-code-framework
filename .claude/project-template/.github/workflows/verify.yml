@@ -1,0 +1,42 @@
+# Build gate — the deterministic backstop of the learning loop.
+# Every scripts/verify-* check runs on every PR; a failing invariant blocks
+# the merge. Session-level rules and hooks can be bypassed; this cannot.
+#
+# Stack-specific steps (build/test) are commented placeholders — enable the
+# ones that match the project. They must FAIL the job, never warn.
+
+name: verify
+
+on:
+  pull_request:
+
+jobs:
+  invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run scripts/verify-* invariant checks
+        run: |
+          shopt -s nullglob
+          status=0
+          found=0
+          for f in scripts/verify-*; do
+            [ -x "$f" ] || continue
+            found=1
+            echo "── $f"
+            "$f" || status=1
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "No scripts/verify-* checks found (nothing graduated yet) — passing."
+          fi
+          exit $status
+
+      # --- Enable for your stack; each step must fail the job on error ---
+      # - uses: actions/setup-node@v4
+      #   with: { node-version: 22, cache: npm }
+      # - run: npm ci
+      # - run: npm run build
+      # - run: npx tsc --noEmit
+      # - run: npm run lint
+      # - run: npm test
